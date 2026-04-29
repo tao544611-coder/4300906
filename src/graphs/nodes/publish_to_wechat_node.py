@@ -1,5 +1,6 @@
 import os
 import json
+import base64
 import requests
 from typing import Dict, List, Any
 from datetime import datetime
@@ -142,15 +143,37 @@ def publish_to_wechat_node(
     
     try:
         wechat = WeChatOfficial()
-        
-        # 生成封面图
+
+        # 生成封面图（带容错处理）
+        thumb_media_id = ""
+        cover_image_url = ""
         today = datetime.now().strftime("%Y年%m月%d日")
-        cover_prompt = f"AI人工智能科技感封面图，现代简约风格，蓝色调，包含机器人、芯片、数据流等元素，适合公众号文章封面，高清，专业"
-        cover_image_url = wechat.generate_image_by_prompt(cover_prompt)
-        
-        # 上传封面图获取media_id
-        perm_result = wechat.upload_permanent_image(cover_image_url)
-        thumb_media_id = perm_result["media_id"]
+
+        try:
+            # 尝试生成封面图
+            cover_prompt = f"AI人工智能科技感封面图，现代简约风格，蓝色调，包含机器人、芯片、数据流等元素，适合公众号文章封面，高清，专业"
+            cover_image_url = wechat.generate_image_by_prompt(cover_prompt)
+
+            # 上传封面图获取media_id
+            perm_result = wechat.upload_permanent_image(cover_image_url)
+            thumb_media_id = perm_result["media_id"]
+
+        except Exception as e:
+            # 图片生成失败，尝试使用默认图片或跳过封面
+            print(f"警告：封面图生成失败，将使用默认方案。错误：{str(e)}")
+
+            # 尝试使用简单的纯色图片作为封面（直接上传一个简单的占位图）
+            try:
+                # 创建一个简单的占位图片（1x1像素的透明PNG）
+                placeholder_img = base64.b64decode(
+                    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+                )
+                perm_result = wechat.upload_permanent_image(placeholder_img)
+                thumb_media_id = perm_result["media_id"]
+                print("成功使用占位图片作为封面")
+            except Exception as e2:
+                print(f"警告：无法上传占位图片，将尝试不使用封面图。错误：{str(e2)}")
+                # thumb_media_id 保持为空字符串，创建草稿时可能需要封面，看微信要求
         
         # 构建文章内容
         title = f"AI早报 | {today} 最新AI行业资讯"
