@@ -153,23 +153,28 @@ def publish_to_wechat_node(
             # 尝试生成封面图
             cover_prompt = f"AI人工智能科技感封面图，现代简约风格，蓝色调，包含机器人、芯片、数据流等元素，适合公众号文章封面，高清，专业"
             cover_image_url = wechat.generate_image_by_prompt(cover_prompt)
+            print(f"图片生成成功：{cover_image_url}")
 
             # 上传封面图获取media_id
             perm_result = wechat.upload_permanent_image(cover_image_url)
             thumb_media_id = perm_result["media_id"]
+            print(f"封面图上传成功，media_id：{thumb_media_id}")
 
         except Exception as e:
-            # 图片生成失败，尝试使用默认图片或跳过封面
-            print(f"警告：封面图生成失败，将使用默认方案。错误：{str(e)}")
+            # 图片生成失败，尝试使用网络图片
+            print(f"警告：封面图生成失败，尝试使用网络图片。错误：{str(e)}")
 
-            # 尝试使用网络图片作为封面（使用公共的免费图片）
             try:
                 # 使用 Unsplash 的免费科技感图片作为封面
                 cover_image_url = "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=900&h=500&fit=crop"
                 print(f"使用网络图片作为封面：{cover_image_url}")
                 perm_result = wechat.upload_permanent_image(cover_image_url)
                 thumb_media_id = perm_result["media_id"]
-                print("成功上传网络图片作为封面")
+                print(f"网络图片上传成功，media_id：{thumb_media_id}")
+            except Exception as e2:
+                print(f"警告：无法上传网络图片，将尝试不使用封面图。错误：{str(e2)}")
+                # thumb_media_id 保持为空字符串
+                # 注意：微信公众号的草稿可能需要封面图，如果失败则无法创建草稿
             except Exception as e2:
                 print(f"警告：无法上传占位图片，将尝试不使用封面图。错误：{str(e2)}")
                 # thumb_media_id 保持为空字符串，创建草稿时可能需要封面，看微信要求
@@ -205,10 +210,18 @@ def publish_to_wechat_node(
             "need_open_comment": 1,
             "only_fans_can_comment": 0
         }
-        
+
+        # 检查是否有有效的封面图
+        if not thumb_media_id:
+            return PublishToWeChatOutput(
+                draft_media_id="",
+                publish_status="发布失败: 无法获取有效的封面图，微信公众号草稿需要封面图。建议：1) 检查网络连接；2) 使用更稳定的图片源；3) 确认公众号有素材管理权限"
+            )
+
         # 创建草稿
         draft_media_id = wechat.add_draft([article])
-        
+        print(f"草稿创建成功，media_id：{draft_media_id}")
+
         return PublishToWeChatOutput(
             draft_media_id=draft_media_id,
             publish_status="草稿已创建"
