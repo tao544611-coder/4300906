@@ -15,20 +15,20 @@ def search_news_node(
     runtime: Runtime[Context]
 ) -> SearchNewsOutput:
     """
-    title: 多渠道搜索AI新闻
-    desc: 从36氪、虎嗅、IT之家、InfoQ、GitHub、arXiv等多个渠道搜索最新的AI新闻、论文和开源项目
+    title: 多渠道搜索AI新闻（今日最新）
+    desc: 从36氪、虎嗅、IT之家、InfoQ、GitHub、arXiv等多个渠道搜索今日或昨日的最新AI新闻、论文和开源项目，只保留时效性强的内容
     integrations: web-search
     """
     ctx = runtime.context
 
-    # 定义多渠道搜索关键词
+    # 定义多渠道搜索关键词（强调时效性）
     search_queries = [
-        f"{state.query} site:36kr.com",  # 36氪
-        f"{state.query} site:huxiu.com",  # 虎嗅
-        f"{state.query} site:ithome.com",  # IT之家
-        f"{state.query} site:infoq.cn",  # InfoQ
-        "AI 开源项目 site:github.com",  # GitHub开源项目
-        "AI 人工智能论文 site:arxiv.org",  # arXiv学术论文
+        f"{state.query} 今日 最新 site:36kr.com",  # 36氪
+        f"{state.query} 今日 最新 site:huxiu.com",  # 虎嗅
+        f"{state.query} 今日 最新 site:ithome.com",  # IT之家
+        f"{state.query} 今日 最新 site:infoq.cn",  # InfoQ
+        "AI 开源项目 最新 site:github.com",  # GitHub开源项目
+        "AI 人工智能 论文 最新 site:arxiv.org",  # arXiv学术论文
     ]
 
     # 创建搜索客户端
@@ -71,5 +71,5 @@ def search_news_node(
             seen_urls.add(result["url"])
             unique_results.append(result)
 
-    # 根据用户要求的数量返回结果
+    # 根据用户要求的数量返回结果（增加数量以确保有足够的新鲜内容）
     return SearchNewsOutput(search_results=unique_results[:state.count])

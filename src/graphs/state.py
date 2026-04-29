@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 class GlobalState(BaseModel):
     """全局状态定义"""
     search_results: List[Dict] = Field(default=[], description="搜索到的AI新闻列表")
-    analyzed_news: List[Dict] = Field(default=[], description="分析后的新闻列表（5-8条）")
+    analyzed_news: List[Dict] = Field(default=[], description="分析后的新闻列表（8-15条）")
     draft_media_id: str = Field(default="", description="公众号草稿ID")
     publish_status: str = Field(default="", description="发布状态")
 
@@ -13,8 +13,8 @@ class GlobalState(BaseModel):
 class GraphInput(BaseModel):
     """工作流的输入"""
     query: str = Field(default="AI行业最新新闻", description="搜索关键词")
-    count: int = Field(default=15, description="搜索新闻数量")
-    news_count: int = Field(default=6, description="最终提取的新闻数量")
+    count: int = Field(default=20, description="搜索新闻数量")
+    news_count: int = Field(default=12, description="最终提取的新闻数量（8-15条）")
 
 
 class GraphOutput(BaseModel):
