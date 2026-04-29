@@ -181,22 +181,101 @@ def publish_to_wechat_node(
         
         # 构建文章内容
         title = f"AI早报 | {today} 最新AI行业资讯"
-        
-        # 构建HTML内容
-        content_html = f'<p style="font-size: 16px; color: #333; line-height: 1.8;">今日AI行业要闻速览：</p>'
-        
-        for i, news in enumerate(state.analyzed_news, 1):
-            content_html += f'''
-<section style="margin: 20px 0; padding: 15px; background: #f5f7fa; border-radius: 8px;">
-<h3 style="font-size: 18px; color: #2c3e50; margin: 0 0 10px 0;">{i}. {news.get("title", "")}</h3>
-<p style="font-size: 14px; color: #7f8c8d; margin: 5px 0;">来源：{news.get("site_name", "")}</p>
-<p style="font-size: 15px; color: #34495e; line-height: 1.6; margin: 10px 0;">{news.get("analysis", "")}</p>
+
+        # 优化后的HTML内容 - 参考微信文章排版
+        content_html = f'''
+<section style="padding: 20px 0; text-align: center; border-bottom: 1px solid #e0e0e0; margin-bottom: 20px;">
+<p style="font-size: 15px; color: #888; margin: 0; font-weight: normal;">
+<span style="color: #07c160;">●</span> 
+<span style="color: #333;">AI行业简报</span>
+<span style="color: #888;">·</span>
+<span style="color: #888;">每日推送</span>
+</p>
+</section>
+
+<section style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px 20px; border-radius: 12px; margin: 20px 0; color: white;">
+<p style="font-size: 22px; font-weight: bold; margin: 0 0 10px 0; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+📱 今日要点
+</p>
+<p style="font-size: 15px; margin: 0; line-height: 1.6; color: rgba(255,255,255,0.95);">
+精选 AI 领域最新动态，涵盖行业新闻、学术前沿、开源项目等多个维度，让您快速了解行业最新进展。
+</p>
 </section>
 '''
-        
+
+        # 分类组织内容
+        categories = {
+            "行业动态": [],
+            "学术前沿": [],
+            "开源项目": []
+        }
+
+        # 将新闻按来源分类
+        for news in state.analyzed_news:
+            site = news.get("site_name", "").lower()
+            title = news.get("title", "")
+
+            if "arxiv" in site or "论文" in title or "学术" in title:
+                categories["学术前沿"].append(news)
+            elif "github" in site or "开源" in title or "项目" in title:
+                categories["开源项目"].append(news)
+            else:
+                categories["行业动态"].append(news)
+
+        # 生成分类内容
+        for category_name, news_list in categories.items():
+            if news_list:
+                # 分类标题
+                if category_name == "行业动态":
+                    color = "#ff6b6b"
+                    emoji = "📰"
+                elif category_name == "学术前沿":
+                    color = "#4ecdc4"
+                    emoji = "🔬"
+                else:
+                    color = "#45b7d1"
+                    emoji = "💻"
+
+                content_html += f'''
+<section style="margin: 30px 0 15px 0;">
+<p style="font-size: 18px; font-weight: bold; margin: 0 0 15px 0; color: {color}; border-left: 4px solid {color}; padding-left: 10px;">
+{emoji} {category_name}
+</p>
+</section>
+'''
+
+                for i, news in enumerate(news_list, 1):
+                    content_html += f'''
+<section style="margin: 0 0 20px 0; padding: 18px; background: #f8f9fa; border-radius: 10px; border-left: 3px solid {color}; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+<h3 style="font-size: 17px; font-weight: 600; color: #2c3e50; margin: 0 0 8px 0; line-height: 1.4;">
+<span style="color: {color};">●</span> {news.get("title", "")}
+</h3>
+<p style="font-size: 13px; color: #95a5a6; margin: 5px 0 12px 0; padding: 4px 8px; background: #fff; border-radius: 4px; display: inline-block;">
+📍 来源：{news.get("site_name", "")}
+</p>
+<p style="font-size: 15px; color: #34495e; line-height: 1.7; margin: 12px 0 0 0;">
+{news.get("analysis", "")}
+</p>
+</section>
+'''
+
+        # 添加结尾
         content_html += '''
-<p style="font-size: 14px; color: #999; text-align: center; margin-top: 30px;">—— 完 ——</p>
-<p style="font-size: 13px; color: #bdc3c7; text-align: center;">本文由AI智能生成，仅供参考</p>
+<section style="margin-top: 40px; padding: 25px 20px; background: linear-gradient(to right, #f8f9fa, #ffffff); border-radius: 12px; text-align: center; border: 1px dashed #dcdcdc;">
+<p style="font-size: 16px; color: #07c160; margin: 0 0 10px 0; font-weight: bold;">✨ 感谢阅读</p>
+<p style="font-size: 14px; color: #7f8c8d; margin: 0 0 15px 0; line-height: 1.6;">
+本文由 AI 智能生成，内容仅供参考。如有建议或反馈，欢迎留言交流。
+</p>
+<p style="font-size: 13px; color: #bdc3c7; margin: 15px 0 0 0;">
+—— END ——
+</p>
+</section>
+
+<section style="margin-top: 30px; padding: 15px; background: #fffbe6; border-radius: 8px; border: 1px solid #ffe58f;">
+<p style="font-size: 13px; color: #d48806; margin: 0; text-align: center;">
+💡 <strong>温馨提示：</strong>点击右上角「…」可分享给好友，点击「在看」让更多人看到
+</p>
+</section>
 '''
         
         # 构建文章对象
