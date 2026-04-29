@@ -189,9 +189,8 @@ def publish_to_wechat_node(
             content_html += f'''
 <section style="margin: 20px 0; padding: 15px; background: #f5f7fa; border-radius: 8px;">
 <h3 style="font-size: 18px; color: #2c3e50; margin: 0 0 10px 0;">{i}. {news.get("title", "")}</h3>
-<p style="font-size: 14px; color: #7f8c8d; margin: 5px 0;">来源：{news.get("site_name", "")} | {news.get("publish_time", "")}</p>
+<p style="font-size: 14px; color: #7f8c8d; margin: 5px 0;">来源：{news.get("site_name", "")}</p>
 <p style="font-size: 15px; color: #34495e; line-height: 1.6; margin: 10px 0;">{news.get("analysis", "")}</p>
-<p style="font-size: 13px; color: #95a5a6;">链接：<a href="{news.get("url", "")}" style="color: #3498db;">阅读原文</a></p>
 </section>
 '''
         
