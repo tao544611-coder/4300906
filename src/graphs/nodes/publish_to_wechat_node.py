@@ -162,15 +162,14 @@ def publish_to_wechat_node(
             # 图片生成失败，尝试使用默认图片或跳过封面
             print(f"警告：封面图生成失败，将使用默认方案。错误：{str(e)}")
 
-            # 尝试使用简单的纯色图片作为封面（直接上传一个简单的占位图）
+            # 尝试使用网络图片作为封面（使用公共的免费图片）
             try:
-                # 创建一个简单的占位图片（1x1像素的透明PNG）
-                placeholder_img = base64.b64decode(
-                    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-                )
-                perm_result = wechat.upload_permanent_image(placeholder_img)
+                # 使用 Unsplash 的免费科技感图片作为封面
+                cover_image_url = "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=900&h=500&fit=crop"
+                print(f"使用网络图片作为封面：{cover_image_url}")
+                perm_result = wechat.upload_permanent_image(cover_image_url)
                 thumb_media_id = perm_result["media_id"]
-                print("成功使用占位图片作为封面")
+                print("成功上传网络图片作为封面")
             except Exception as e2:
                 print(f"警告：无法上传占位图片，将尝试不使用封面图。错误：{str(e2)}")
                 # thumb_media_id 保持为空字符串，创建草稿时可能需要封面，看微信要求
