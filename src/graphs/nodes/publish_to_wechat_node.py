@@ -213,11 +213,11 @@ def publish_to_wechat_node(
         # 将新闻按来源分类
         for news in state.analyzed_news:
             site = news.get("site_name", "").lower()
-            title = news.get("title", "")
+            news_title = news.get("title", "")
 
-            if "arxiv" in site or "论文" in title or "学术" in title:
+            if "arxiv" in site or "论文" in news_title or "学术" in news_title:
                 categories["学术前沿"].append(news)
-            elif "github" in site or "开源" in title or "项目" in title:
+            elif "github" in site or "开源" in news_title or "项目" in news_title:
                 categories["开源项目"].append(news)
             else:
                 categories["行业动态"].append(news)
